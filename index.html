@@ -1,146 +1,88 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Ticket Booking PRO</title>
+<title>IRCTC PRO SYSTEM</title>
 
-  <style>
-    body {
-      background: #0b1220;
-      color: white;
-      font-family: Arial;
-    }
+<style>
+body { background:#0b1220; color:white; font-family:Arial; }
+.container { width:900px; margin:30px auto; background:#111827; padding:20px; border-radius:10px; }
+input,select,button { width:100%; padding:10px; margin:5px 0; background:#1f2937; color:white; border:none; border-radius:5px; }
+button { background:#00ffff; font-weight:bold; cursor:pointer; }
+button:hover { background:#00cccc; }
+.box { border:1px solid #00ffff30; padding:10px; margin-bottom:10px; }
+.train { background:#1f2937; padding:10px; margin:5px 0; border-radius:5px; }
+.row { display:flex; gap:10px; }
+</style>
 
-    .container {
-      width: 900px;
-      margin: 30px auto;
-      background: #111827;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px #00ffff40;
-    }
-
-    h2 {
-      text-align: center;
-      color: #00ffff;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 8px;
-      margin: 5px 0;
-      background: #1f2937;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-
-    .row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .box {
-      border: 1px solid #00ffff30;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #00ffff;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #00cccc;
-    }
-  </style>
 </head>
 
 <body>
 
 <div class="container">
 
-<h2>🚄 Ticket Booking PRO</h2>
+<h2>🚄 IRCTC PRO SYSTEM</h2>
 
-<form id="form">
-
-<!-- CONTACT -->
+<!-- 🔍 TRAIN SEARCH -->
 <div class="box">
-  <h3>Contact</h3>
-  <input id="mobile" placeholder="Mobile Number">
+<h3>Search Train</h3>
+<input id="from" placeholder="From (NDLS)">
+<input id="to" placeholder="To (BCT)">
+<button onclick="searchTrain()">Search Train</button>
 </div>
 
-<!-- STATION -->
+<div id="trains"></div>
+
+<!-- 🎫 BOOKING -->
 <div class="box">
-  <h3>Journey</h3>
+<h3>Booking Details</h3>
 
-  <input id="from" placeholder="From Code (NDLS)">
-  <input id="fromName" placeholder="From Station Name" readonly>
-
-  <input id="to" placeholder="To Code (BCT)">
-  <input id="toName" placeholder="To Station Name" readonly>
-
-  <input id="date" placeholder="Journey Date">
-</div>
+<input id="mobile" placeholder="Mobile Number">
+<input id="date" placeholder="Journey Date">
 
 <!-- PASSENGERS -->
-<div class="box">
-  <h3>Passenger 1</h3>
-  <div class="row">
-    <input id="name1" placeholder="Name">
-    <input id="age1" placeholder="Age">
-    <select id="gender1">
-      <option>Male</option>
-      <option>Female</option>
-    </select>
-  </div>
+<h4>Passenger 1</h4>
+<div class="row">
+<input id="name1" placeholder="Name">
+<input id="age1" placeholder="Age">
+<select id="gender1">
+<option>Male</option>
+<option>Female</option>
+</select>
 </div>
 
-<div class="box">
-  <h3>Passenger 2</h3>
-  <div class="row">
-    <input id="name2" placeholder="Name">
-    <input id="age2" placeholder="Age">
-    <select id="gender2">
-      <option>Male</option>
-      <option>Female</option>
-    </select>
-  </div>
+<h4>Passenger 2</h4>
+<div class="row">
+<input id="name2" placeholder="Name">
+<input id="age2" placeholder="Age">
+<select id="gender2">
+<option>Male</option>
+<option>Female</option>
+</select>
 </div>
 
-<div class="box">
-  <h3>Passenger 3</h3>
-  <div class="row">
-    <input id="name3" placeholder="Name">
-    <input id="age3" placeholder="Age">
-    <select id="gender3">
-      <option>Male</option>
-      <option>Female</option>
-    </select>
-  </div>
+<h4>Passenger 3</h4>
+<div class="row">
+<input id="name3" placeholder="Name">
+<input id="age3" placeholder="Age">
+<select id="gender3">
+<option>Male</option>
+<option>Female</option>
+</select>
 </div>
 
-<div class="box">
-  <h3>Passenger 4</h3>
-  <div class="row">
-    <input id="name4" placeholder="Name">
-    <input id="age4" placeholder="Age">
-    <select id="gender4">
-      <option>Male</option>
-      <option>Female</option>
-    </select>
-  </div>
+<h4>Passenger 4</h4>
+<div class="row">
+<input id="name4" placeholder="Name">
+<input id="age4" placeholder="Age">
+<select id="gender4">
+<option>Male</option>
+<option>Female</option>
+</select>
 </div>
 
-<button type="submit">SAVE ALL</button>
+<button onclick="book()">BOOK TICKET</button>
 
-</form>
+</div>
 
 <p id="msg"></p>
 
@@ -148,42 +90,46 @@
 
 <script>
 
-// 🔥 Station API function
-async function getStationName(code, targetId) {
-  if(code.length < 2) return;
+// 🔍 TRAIN SEARCH
+async function searchTrain(){
+  let from = document.getElementById("from").value;
+  let to = document.getElementById("to").value;
 
-  try {
-    const res = await fetch("https://indian-railway-api.cyclic.app/stations?q=" + code);
-    const data = await res.json();
+  document.getElementById("trains").innerHTML = "Loading...";
 
-    if(data.data && data.data.length > 0) {
-      document.getElementById(targetId).value = data.data[0].name;
+  try{
+    let res = await fetch("https://indian-railway-api.cyclic.app/trains?from="+from+"&to="+to);
+    let data = await res.json();
+
+    let html = "";
+
+    if(data.data && data.data.length > 0){
+      data.data.forEach(t => {
+        html += `
+          <div class="train">
+            🚄 ${t.name} (${t.train_number})<br>
+            ${t.from} ➜ ${t.to}
+          </div>
+        `;
+      });
+    } else {
+      html = "❌ No Train Found";
     }
-  } catch(e) {
-    console.log("Error", e);
+
+    document.getElementById("trains").innerHTML = html;
+
+  }catch(e){
+    document.getElementById("trains").innerHTML = "Error loading trains";
   }
 }
 
-// FROM
-document.getElementById("from").addEventListener("keyup", function(){
-  getStationName(this.value, "fromName");
-});
-
-// TO
-document.getElementById("to").addEventListener("keyup", function(){
-  getStationName(this.value, "toName");
-});
-
-// FORM SUBMIT
-document.getElementById("form").addEventListener("submit", async function(e){
-  e.preventDefault();
+// 🎫 BOOK FUNCTION
+async function book(){
 
   const data = {
     mobile: mobile.value,
     from: from.value,
-    fromName: fromName.value,
     to: to.value,
-    toName: toName.value,
     date: date.value,
 
     passengers: [
@@ -194,16 +140,14 @@ document.getElementById("form").addEventListener("submit", async function(e){
     ]
   };
 
-  const res = await fetch("https://ticket-system-production-bfea.up.railway.app/save", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
+  await fetch("https://ticket-system-production-bfea.up.railway.app/save", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
     body: JSON.stringify(data)
   });
 
-  const result = await res.json();
-
-  document.getElementById("msg").innerText = "✅ Ticket Saved Successfully";
-});
+  document.getElementById("msg").innerText = "✅ Ticket Booked Successfully";
+}
 
 </script>
 
