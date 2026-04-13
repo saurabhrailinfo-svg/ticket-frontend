@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ticket Booking PRO</title>
+
+  <style>
+    body {
+      background: #0b1220;
+      color: white;
+      font-family: Arial;
+    }
+
+    .container {
+      width: 900px;
+      margin: 30px auto;
+      background: #111827;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #00ffff40;
+    }
+
+    h2 {
+      text-align: center;
+      color: #00ffff;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      background: #1f2937;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .box {
+      border: 1px solid #00ffff30;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #00ffff;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #00cccc;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🚄 Ticket Booking PRO</h2>
+
+<form id="form">
+
+<!-- CONTACT -->
+<div class="box">
+  <h3>Contact</h3>
+  <input id="mobile" placeholder="Mobile Number">
+</div>
+
+<!-- STATION -->
+<div class="box">
+  <h3>Journey</h3>
+
+  <input id="from" placeholder="From Code (NDLS)">
+  <input id="fromName" placeholder="From Station Name" readonly>
+
+  <input id="to" placeholder="To Code (BCT)">
+  <input id="toName" placeholder="To Station Name" readonly>
+
+  <input id="date" placeholder="Journey Date">
+</div>
+
+<!-- PASSENGERS -->
+<div class="box">
+  <h3>Passenger 1</h3>
+  <div class="row">
+    <input id="name1" placeholder="Name">
+    <input id="age1" placeholder="Age">
+    <select id="gender1">
+      <option>Male</option>
+      <option>Female</option>
+    </select>
+  </div>
+</div>
+
+<div class="box">
+  <h3>Passenger 2</h3>
+  <div class="row">
+    <input id="name2" placeholder="Name">
+    <input id="age2" placeholder="Age">
+    <select id="gender2">
+      <option>Male</option>
+      <option>Female</option>
+    </select>
+  </div>
+</div>
+
+<div class="box">
+  <h3>Passenger 3</h3>
+  <div class="row">
+    <input id="name3" placeholder="Name">
+    <input id="age3" placeholder="Age">
+    <select id="gender3">
+      <option>Male</option>
+      <option>Female</option>
+    </select>
+  </div>
+</div>
+
+<div class="box">
+  <h3>Passenger 4</h3>
+  <div class="row">
+    <input id="name4" placeholder="Name">
+    <input id="age4" placeholder="Age">
+    <select id="gender4">
+      <option>Male</option>
+      <option>Female</option>
+    </select>
+  </div>
+</div>
+
+<button type="submit">SAVE ALL</button>
+
+</form>
+
+<p id="msg"></p>
+
+</div>
+
+<script>
+
+// 🔥 Station API function
+async function getStationName(code, targetId) {
+  if(code.length < 2) return;
+
+  try {
+    const res = await fetch("https://indian-railway-api.cyclic.app/stations?q=" + code);
+    const data = await res.json();
+
+    if(data.data && data.data.length > 0) {
+      document.getElementById(targetId).value = data.data[0].name;
+    }
+  } catch(e) {
+    console.log("Error", e);
+  }
+}
+
+// FROM
+document.getElementById("from").addEventListener("keyup", function(){
+  getStationName(this.value, "fromName");
+});
+
+// TO
+document.getElementById("to").addEventListener("keyup", function(){
+  getStationName(this.value, "toName");
+});
+
+// FORM SUBMIT
+document.getElementById("form").addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  const data = {
+    mobile: mobile.value,
+    from: from.value,
+    fromName: fromName.value,
+    to: to.value,
+    toName: toName.value,
+    date: date.value,
+
+    passengers: [
+      {name: name1.value, age: age1.value, gender: gender1.value},
+      {name: name2.value, age: age2.value, gender: gender2.value},
+      {name: name3.value, age: age3.value, gender: gender3.value},
+      {name: name4.value, age: age4.value, gender: gender4.value}
+    ]
+  };
+
+  const res = await fetch("https://ticket-system-production-bfea.up.railway.app/save", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+
+  document.getElementById("msg").innerText = "✅ Ticket Saved Successfully";
+});
+
+</script>
+
+</body>
+</html>
